@@ -1,6 +1,5 @@
 ## Libraries
 * openneuro-py (optional, but recommended)
-    * **Not necessary for downloading dataset, but would be helpful, more details below**
     * Documentation: [openneuro-py](https://github.com/openneuro-py/openneuro-py)
 * mne-bids
     * Documentation: [mne-tools](https://mne.tools/mne-bids/stable/api.html)
