@@ -1,4 +1,4 @@
-from os import getcwd
+from os import getcwd, makedirs
 from mne.datasets import sample
 from mne_bids import (
     BIDSPath,
@@ -27,7 +27,8 @@ def read_and_plot (bids_path : BIDSPath, subject : str, suffix : str, task : str
 
 dataset = "ds004504"
 
-dspath = getcwd()
+# project root directory
+dspath = getcwd() + "/../.."
 sample.data_path(path=dspath)
 bids_root = sample.data_path().parent / dataset
 
@@ -38,10 +39,12 @@ bids_root = sample.data_path().parent / dataset
 extensions = [".set", ".tsv"]
 datatype = "eeg"
 task = "eyesclosed"
-alzheimers = ["001", "Alzheimers"]
-control = ["037", "Control"]
+img_folder = "../plots"
+alzheimers = ["001", img_folder + "/" + "Alzheimers"]
+control = ["037",  img_folder + "/" +"Control"]
 channel = "F4"
 
 bids_path = BIDSPath(root=bids_root, datatype=datatype)
+makedirs(name=img_folder, mode=0o777, exist_ok=True)
 read_and_plot(bids_path, alzheimers[0], datatype, task, alzheimers[1], channel)
 read_and_plot(bids_path, control[0], datatype, task, control[1], channel)
