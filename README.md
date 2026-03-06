@@ -4,7 +4,7 @@
 * **[mne](https://github.com/mne-tools/mne-python)**
 
 ## Dataset Downloading
-**In [`vis.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/phase_1/stage1/src/vis.py), the dataset will automatically be downloaded in the project root directory, and operations on the dataset assume this directory structure. If you would like to manually install the dataset, instructions below are provided.*
+**In [`vis.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/phase_1/stage1/src/vis.py), the dataset will automatically be downloaded in the project root directory, and operations on the dataset assume this directory structure. If you would like to manually install the dataset, instructions below are provided.**
 1. Download with openneuro cli (recommended)
      * `openneuro-py download --dataset=ds004504 --target-dir=<whatever_directory>`
      * If the `--target-dir` option is not provided, the current directory will be used by default. Keep in mind that it is assumed it exists in the project root directory, so downloading it there would be most convenient.
