@@ -1,10 +1,7 @@
 ## Libraries
-* openneuro-py (optional, but recommended)
-    * Documentation: [openneuro-py](https://github.com/openneuro-py/openneuro-py)
-* mne-bids
-    * Documentation: [mne-tools](https://mne.tools/mne-bids/stable/api.html)
-* mne
-    * Documentation: [mne](https://github.com/mne-tools/mne-python)
+* **[openneuro-py](https://github.com/openneuro-py/openneuro-py) (optional, but recommended)**
+* **[mne-bids](https://mne.tools/mne-bids/stable/api.html)**
+* **[mne](https://github.com/mne-tools/mne-python)**
 
 ## Dataset Downloading
 **The MNE BIDS library has to install a sample set of files for its initial setup (~1.5GB). In [`vis.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/phase_1/stage1/src/vis.py), the sample files are set up to be installed in the project root directory. This is separate from the EEG dataset that is instructed to be downloaded.**
