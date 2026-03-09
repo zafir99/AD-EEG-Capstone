@@ -66,5 +66,7 @@ bids_path = BIDSPath(root=bids_root, datatype=datatype)
 # make image plot directory
 makedirs(name=img_folder, mode=0o777, exist_ok=True)
 # read in data and plot
-read_and_plot(bids_path, alzheimers[0], datatype, task, alzheimers[1], channel)
-read_and_plot(bids_path, control[0], datatype, task, control[1], channel)
+read_and_plot(bids_path=bids_path, subject=alzheimers[0], suffix=datatype,
+              task=task, filename=alzheimers[1], channel=channel)
+read_and_plot(bids_path=bids_path, subject=control[0], suffix=datatype,
+              task=task, filename=control[1], channel=channel)
