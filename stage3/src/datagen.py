@@ -99,9 +99,13 @@ for i in range (num_a) :
     af.write(str(a_channel_avg[i][0]) + ',' + str(a_channel_avg[i][1]) + ',' +
              str(a_channel_avg[i][2]) + ',' + str(a_channel_avg[i][3]) + '\n')
 
+print("Alzheimers csv file successfully made!\n")
+
 for i in range (num_c) :
     cf.write(str(c_channel_avg[i][0]) + ',' + str(c_channel_avg[i][1]) + ',' +
              str(c_channel_avg[i][2]) + ',' + str(c_channel_avg[i][3]) + '\n')
+
+print("Control csv file successfully made!\n")
 
 af.close()
 cf.close()

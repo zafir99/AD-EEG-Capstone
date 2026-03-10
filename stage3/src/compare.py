@@ -15,8 +15,8 @@ out_path = dspath / out_folder
 con_path = out_path / "con_channel_band_avg.csv"
 alz_path = out_path / "alz_channel_band_avg.csv"
 
-if not con_path.exists() or not alz_path.exists() :
-    raise Exception("No .csv files found! Run datagen.py before running this script!")
+if not (con_path.exists() and alz_path.exists()) :
+    raise Exception("1 or more .csv files missing! Run datagen.py before running this script!")
 
 print(f"'out' folder found at: {out_path}")
 print(f"Control Path: {con_path}")
