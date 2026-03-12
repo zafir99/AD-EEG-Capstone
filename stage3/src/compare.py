@@ -23,17 +23,17 @@ print(f"'out' folder found at: {out_path}")
 print(f"Control Path: {con_path}")
 print(f"Alzheimer Path: {alz_path}")
 
-total_sub = 65
-alz_sub = 36
-con_sub = 29
-
-#caclulating band power from the PSD data from datagen
-
-def calculate_band_power(data, low, high):
-    #filter on the ranges
-    band_data = data[(data['Frequency'] >= low) & (data['Frequency'] <= high)]
-    return band_data['Power'].mean()
-
+######BELOW IS THE MAIN HEAD ACHE######
+#Compute means (average)  band power per subject (65).
+# Each subject should have one representative value per band (or per selected channel/region).
+#Average along the band  (alpha theta delta)
+# Idea: Have the average band / subject ie Subject 1= Delta AVg, ... Subject 2: Delta poer ... for all 4 bands
+#Save that into a csv file 
+# At line 67 is box plots, anything below has not been changed since Tuesday
+#The task below has the correct logic but incorrect data, should be data from ^
+#Create:Boxplot of Alpha power (AD vs Control)
+#Boxplot of Theta power (AD vs Control)
+#  2. Perform statistical testing (report simple difference in means or t-test): Report your observations.
 
 
 # Load data
@@ -48,24 +48,16 @@ print(con_data.columns)
 
 #combine data into one dataframe
 combined = pd.concat([alz_data, con_data], ignore_index=True)
+alz_data['Group'] ='AD'
+con_data['Group'] ='Control'
 
-bands={
-'Delta': (1,4),
-'Theta' : (4,8),
-'Alpha' : (8,13),
-'Beta'  : (13,30)
-}
+bands= ["Delata_Power", "Theta_Power", "Alpha_Power", "Beta_Power"]
 avg = pd.DataFrame(index = range(len(combined)), columns=bands.keys())
 
-
 #loop through each row (sucject) calculate averages
-for index in range(len(combined)):
-    subject_data = combined.iloc[[index]]
-    for band, (low,high) in bands.items():
-        avg.at[index,bands] = calculate_band_power(subject_data,low,high)
-
+print(combined.shape)
 #saving
-avg.to_csv('avg/sub', index=False)
+avg.to_csv('avg_of_pwrs', index=False)
 
 
 # Boxplot for Alpha Power
