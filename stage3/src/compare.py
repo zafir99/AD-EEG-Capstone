@@ -24,17 +24,11 @@ print(f"Alzheimer Path: {alz_path}")
 
 # Load data
 #need to filter out the columns we are using (alpha & theta)
-alz_data = pd.read_csv(alz_path,usecols=['Channel','Alpha_Power','Theta_Power'])
-con_data = pd.read_csv(con_path,usecols=['Channel','Alpha_Power','Theta_Power'])
-
-# calculating mean band power 
-mean_alz = alz_data.groupby('Channel').agg({'Alpha_Power': 'mean', 'Theta_Power': 'mean'}).reset_index()
-mean_alz['Group'] = 'AD'
-mean_con = con_data.groupby('Channel').agg({'Alpha_Power': 'mean', 'Theta_Power': 'mean'}).reset_index()
-mean_con['Group'] = 'Control'
+alz_data = pd.read_csv(alz_path,usecols=['Alpha_Power','Theta_Power'])
+con_data = pd.read_csv(con_path,usecols=['Alpha_Power','Theta_Power'])
 
 # combine dataframes
-mean_data = pd.concat([mean_alz, mean_con], ignore_index=True)
+mean_data = pd.concat([alz_data, con_data], ignore_index=True)
 
 # Boxplot for Alpha Power
 plt.figure(figsize=(10, 6))

@@ -40,7 +40,7 @@ dspath = cwd.parent.parent
 dataset = "ds004504"
 
 # bids file path
-bids_root = dspath / dataset
+bids_root = dspath / dataset / "derivatives"
 
 # check if dataset exists, download if it doesn't
 if not bids_root.exists() :

@@ -11,7 +11,7 @@ from mne_bids import (
 )
 
 def read_and_plot (bids_path : BIDSPath, subject : str, suffix : str, task : str,
-                   filename : str, channel : str) :
+                   filename : str, channel : str, p_type : str) :
 
     bids_path = bids_path.update(subject=subject, suffix=suffix, task=task)
     raw = read_raw_bids(bids_path, verbose=False).pick(picks=channel)
@@ -21,8 +21,8 @@ def read_and_plot (bids_path : BIDSPath, subject : str, suffix : str, task : str
     # setting plotting time to 10 seconds
     dur=10
     # basic plot formatting, show=False means no window popup, clipping=1 means line can go out of bounds
-    fig = raw.plot(time_format="float", show_scrollbars=False, show=False, duration=dur, clipping=1)
-    title = f"{channel} Channel Readings for Subject {subject} ({filename})"
+    fig = raw.plot(time_format="float", show_scrollbars=False, show=False, duration=dur, scalings="auto", clipping=1)
+    title = f"{channel} Channel Readings for Subject {subject} ({p_type})"
 
     # further plot formatting
     fig.suptitle(t=title, y = 0.965, size="xx-large", weight="demi")
@@ -39,7 +39,7 @@ cwd = Path(getcwd())
 # project root directory
 dspath = cwd.parent.parent
 # set bids root directory
-bids_root = dspath / dataset
+bids_root = dspath / dataset / "derivatives"
 
 # downloading dataset to bids root directory only if it does not exist
 if not bids_root.exists() :
@@ -67,6 +67,6 @@ bids_path = BIDSPath(root=bids_root, datatype=datatype)
 makedirs(name=img_folder, mode=0o777, exist_ok=True)
 # read in data and plot
 read_and_plot(bids_path=bids_path, subject=alzheimers[0], suffix=datatype,
-              task=task, filename=alzheimers[1], channel=channel)
+              task=task, filename=alzheimers[1], channel=channel, p_type="Alzheimers")
 read_and_plot(bids_path=bids_path, subject=control[0], suffix=datatype,
-              task=task, filename=control[1], channel=channel)
+              task=task, filename=control[1], channel=channel, p_type="Control")
