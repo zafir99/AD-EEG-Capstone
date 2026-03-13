@@ -23,19 +23,6 @@ print(f"'out' folder found at: {out_path}")
 print(f"Control Path: {con_path}")
 print(f"Alzheimer Path: {alz_path}")
 
-######BELOW IS THE MAIN HEAD ACHE######
-#Compute means (average)  band power per subject (65).
-# Each subject should have one representative value per band (or per selected channel/region).
-#Average along the band  (alpha theta delta)
-# Idea: Have the average band / subject ie Subject 1= Delta AVg, ... Subject 2: Delta poer ... for all 4 bands
-#Save that into a csv file 
-# At line 67 is box plots, anything below has not been changed since Tuesday
-#The task below has the correct logic but incorrect data, should be data from ^
-#Create:Boxplot of Alpha power (AD vs Control)
-#Boxplot of Theta power (AD vs Control)
-#  2. Perform statistical testing (report simple difference in means or t-test): Report your observations.
-
-
 # Load data
 alz_data = pd.read_csv(alz_path)
 con_data = pd.read_csv(con_path)
@@ -47,12 +34,12 @@ print(con_data.head())
 print(con_data.columns)
 
 #combine data into one dataframe
-combined = pd.concat([alz_data, con_data], ignore_index=True)
 alz_data['Group'] ='AD'
 con_data['Group'] ='Control'
+combined = pd.concat([alz_data, con_data], ignore_index=True)
 
 bands= ["Delta_Power", "Theta_Power", "Alpha_Power", "Beta_Power"]
-avg = pd.DataFrame(index = range(len(combined)), columns=bands.keys())
+avg = pd.DataFrame(index = range(len(combined)), columns=bands)
 
 #loop through each row (sucject) calculate averages
 print(combined.shape)
@@ -88,7 +75,6 @@ print("Control Group Average Power:\n", con_average_power)
 
 
 # combine dataframes
-#mean_data = pd.concat([alz_avg, con_average_power], ignore_index=True)
 alz_data['Group'] ='AD'
 con_data['Group'] ='Control'
 combined = pd.concat([alz_data, con_data], ignore_index=True)
