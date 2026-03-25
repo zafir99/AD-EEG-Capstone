@@ -43,9 +43,6 @@ avg = pd.DataFrame(index = range(len(combined)), columns=bands)
 
 #loop through each row (sucject) calculate averages
 print(combined.shape)
-#saving
-avg.to_csv('avg_of_pwrs', index=False)
-
 
 # Boxplot for Alpha Power
 plt.figure(figsize=(10, 6))
