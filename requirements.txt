@@ -1,0 +1,5 @@
+openneuro-py==2026.1.0
+mne-bids==0.18.0
+mne==1.11.0
+scipy==1.17.1
+scikit-learn==1.8.0
