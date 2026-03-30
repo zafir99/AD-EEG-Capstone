@@ -3,7 +3,7 @@ import numpy as np
 from os import getcwd, makedirs
 from pathlib import Path
 from mne.io import Raw
-from mne import make_fixed_length_epochs as mfl_epochs
+from mne import Epochs, make_fixed_length_epochs as mfl_epochs
 
 from mne_bids import (
     BIDSPath,
@@ -19,11 +19,11 @@ from mne_bids import (
 def write_csv (fname : str, len : int, data : np.ndarray, root_dir : Path) :
     real_path = root_dir / fname
     f = open(real_path, "wt")
-    f.write("Delta_Power,Theta_Power,Alpha_Power,Beta_Power\n")
+    f.write("Delta_Power,Theta_Power,Alpha_Power,Beta_Power,Gamma_Power\n")
 
     for i in len :
         f.write(str(data[i][0]) + ',' + str(data[i][1]) + ',' +
-                str(data[i][2]) + ',' + str(data[i][3]) + '\n')
+                str(data[i][2]) + ',' + str(data[i][3]) + str(data[i][4]) + '\n')
 
     print(f"\"{fname}\" successfully made!")
     f.close()
@@ -31,22 +31,24 @@ def write_csv (fname : str, len : int, data : np.ndarray, root_dir : Path) :
 
 
 def process_psd (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tuple[int]],
-                 num_channels : int, num_bands : int) -> np.ndarray :
+                 num_channels : int, num_bands : int) -> [[]] :
 
     subject_data = [ [] * num_subjects ]
     epoch_dur = 4.0
     overlap_ratio = 0.5
     overlap = overlap_ratio*epoch_dur
+    fmin = freq_bands[0][0]
+    fmax = freq_bands[num_bands-1][1]
 
-    for i in range(num_subjects) :
+    for i in range(1) :
         bids_path.update(subject=str(i+1).zfill(3))
         raw = read_raw_bids(bids_path=bids_path, verbose=False)
         epochs = mfl_epochs(raw=raw, duration=epoch_dur, overlap=overlap)
-        specs = list(map(compute_psd(method="welch", verbose=False), epochs))
+        epochs.drop_bad()
+        e_len = len(epochs())
+        specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax)
 
-        total_psd
-        for j in range(num_bands) :
-            subject_data[i].append
+        #for j in range(num_bands) :
 
         # cleanup
         raw.close()
@@ -84,13 +86,15 @@ ftd = (66,88)
 num_a = alzheimers[1]-alzheimers[0]+1
 num_c = control[1]-control[0]+1
 num_f = ftd[1]-ftd[0]+1
+num_subjects = 88
 
 # frequency bands
 delta = (0.5,4)
 theta = (4,8)
 alpha = (8,13)
 beta  = (13,30)
-freq_bands = (delta, theta, alpha, beta)
+gamma = (30,45)
+freq_bands = (delta, theta, alpha, beta, gamma)
 num_bands = len(freq_bands)
 
 # all channel types in ds004504
@@ -113,7 +117,7 @@ a_fname = "alz_epoch_rbp.csv"
 c_fname = "con_epoch_rbp.csv"
 f_fname = "ftd_epoch_rbp.csv"
 
-write_csv(filename=a_fname, root_dir=out_folder, data=a_channel_avg, len=num_a)
-write_csv(filename=c_fname, root_dir=out_folder, data=c_channel_avg, len=num_c)
-write_csv(filename=f_fname, root_dir=out_folder, data=f_channel_avg, len=num_f)
+#write_csv(filename=a_fname, root_dir=out_folder, data=a_channel_avg, len=num_a)
+#write_csv(filename=c_fname, root_dir=out_folder, data=c_channel_avg, len=num_c)
+#write_csv(filename=f_fname, root_dir=out_folder, data=f_channel_avg, len=num_f)
 
