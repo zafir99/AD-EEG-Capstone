@@ -33,7 +33,7 @@ def write_csv (fname : str, len : int, data : np.ndarray, root_dir : Path) :
 def process_psd (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tuple[int]],
                  num_channels : int, num_bands : int) -> np.ndarray :
 
-    subject_data = list()
+    subject_data = [ [] * num_subjects ]
     epoch_dur = 4.0
     overlap_ratio = 0.5
     overlap = overlap_ratio*epoch_dur
@@ -44,8 +44,9 @@ def process_psd (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tu
         epochs = mfl_epochs(raw=raw, duration=epoch_dur, overlap=overlap)
         specs = list(map(compute_psd(method="welch", verbose=False), epochs))
 
+        total_psd
         for j in range(num_bands) :
-            d
+            subject_data[i].append
 
         # cleanup
         raw.close()
