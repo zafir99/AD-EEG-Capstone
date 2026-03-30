@@ -30,8 +30,8 @@ def write_csv (fname : str, len : int, data : np.ndarray, root_dir : Path) :
     return
 
 
-def process_psd (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tuple[int]],
-                 num_channels : int, num_bands : int) -> [[]] :
+def process_rbp (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tuple[int]],
+                 num_channels : int, num_bands : int) -> list(np.ndarray) :
 
     subject_data = [ [] * num_subjects ]
     epoch_dur = 4.0
@@ -44,14 +44,27 @@ def process_psd (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tu
         bids_path.update(subject=str(i+1).zfill(3))
         raw = read_raw_bids(bids_path=bids_path, verbose=False)
         epochs = mfl_epochs(raw=raw, duration=epoch_dur, overlap=overlap)
-        epochs.drop_bad()
-        e_len = len(epochs())
+        # dont need to drop any epochs
+        # load data from disk
+        epochs.load_data()
+        e_len = len(epochs)
+
         specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax)
+        total_psd_per_epoch = specs.get_data().sum(axis=1).sum(axis=1)
+        arr = np.zeros(shape=(e_len,num_channels), dtype=np.float64)
 
-        #for j in range(num_bands) :
+        for j in range(num_bands) :
+            freq_data = specs.get_data(fmin=freq_bands[j][0], fmax=freq_bands[j][1]).sum(axis=1).sum(axis=1)
+            for k in range (e_len) :
+                rbp = freq_data[k] / total_psd_per_epoch[k]
+                print(rbp)
+                arr[k][j] = rbp
 
+        # save data to overall list
+        subject_data.append(arr)
         # cleanup
         raw.close()
+        del specs
         del epochs
         del raw
     return subject_data
@@ -106,12 +119,13 @@ num_channels = len(channels)
 bids_path = BIDSPath(root=bids_root, task=task, suffix=datatype,
                      extension=extensions[0], datatype=datatype)
 
-psd_channel_avgs = process_psd(bids_path=bids_path, num_subjects=num_subjects,
+rbp_data = process_rbp(bids_path=bids_path, num_subjects=num_subjects,
                                freq_bands=freq_bands, num_channels=num_channels,
                                num_bands=num_bands)
 
-a_data = psd_channel_avgs[alzheimers[0]-1:alzheimers[1]].mean(axis=2)
-c_data = psd_channel_avgs[control[0]-1:control[1]].mean(axis=2)
+a_data = rbp_data[alzheimers[0]-1:alzheimers[1]]
+c_data = rbp_data[control[0]-1:control[1]]
+f_data = rbp_data[ftd[0]-1:ftd[1]]
 
 a_fname = "alz_epoch_rbp.csv"
 c_fname = "con_epoch_rbp.csv"
