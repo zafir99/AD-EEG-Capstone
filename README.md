@@ -1,9 +1,12 @@
 ## Acknowledgements
-**We aknowledge support of the 2nd Department of Neurology of AHEPA General University Hospital of Thessaloniki. We acknowledge support of this work from the project “Immersive Virtual, Augmented and Mixed Reality Center of Epirus” (MIS 5047221) which is implemented under the Action “Reinforcement of the Research and Innovation Infrastructure”, funded by the Operational Programme “Competitiveness, Entrepreneurship and Innovation” (NSRF 2014-2020) and co-financed by Greece and the European Union (European Regional Development Fund).**
+**We acknowledge support of the 2nd Department of Neurology of AHEPA General University Hospital of Thessaloniki. We acknowledge support of this work from the project “Immersive Virtual, Augmented and Mixed Reality Center of Epirus” (MIS 5047221) which is implemented under the Action “Reinforcement of the Research and Innovation Infrastructure”, funded by the Operational Programme “Competitiveness, Entrepreneurship and Innovation” (NSRF 2014-2020) and co-financed by Greece and the European Union (European Regional Development Fund).**
 
 **Andreas Miltiadous, Katerina D. Tzimourta, Theodora Afrantou, Panagiotis Ioannidis, Nikolaos Grigoriadis, Dimitrios G. Tsalikakis, Pantelis Angelidis, Markos G. Tsipouras, Evripidis Glavas, Nikolaos Giannakeas, and Alexandros T. Tzallas (2024). A dataset of EEG recordings from: Alzheimer's disease, Frontotemporal dementia and Healthy subjects. OpenNeuro. [Dataset] doi: doi:10.18112/openneuro.ds004504.v1.0.7**
 
 **Data descriptor: 10.3390/data8060095 First study on this dataset: 10.1109/ACCESS.2023.3294618**
+
+## Preface
+This branch is largely intended to be an emulation of the aforementioned, [original study](https://www.mdpi.com/2306-5729/8/6/95). [`dsprocess.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/svm/src/dsprocess.py) outlines the steps of creating the population of working data for the SVM model. This involves calculating the Relative Band Power (RBP) by splitting the raw data of each patient into 4 second epochs with a 50% overlap and then computing the relative ratio for the PSD of each epoch with reference to the PSD of the entire measured frequency range. 
 
 ## Libraries
 * **[openneuro-py](https://github.com/openneuro-py/openneuro-py)**
