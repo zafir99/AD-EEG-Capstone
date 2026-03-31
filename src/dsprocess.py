@@ -16,9 +16,9 @@ from mne_bids import (
 
 # maybe im an idiot for writing this method
 # God knows best
-def write_rbp_to_csv (fname : str, 
-                      sub_len : int, 
-                      data : list[np.ndarray], 
+def write_rbp_to_csv (fname : str,
+                      sub_len : int,
+                      data : list[np.ndarray],
                       root_dir : Path) :
 
     real_path = root_dir / fname
@@ -37,10 +37,9 @@ def write_rbp_to_csv (fname : str,
     return
 
 
-def process_rbp (bids_path : BIDSPath, 
-                 num_subjects : int, 
+def process_rbp (bids_path : BIDSPath,
+                 num_subjects : int,
                  freq_bands : Tuple[Tuple[int]],
-                 num_channels : int, 
                  num_bands : int) -> list[np.ndarray] :
 
     subject_data = []
@@ -130,8 +129,7 @@ bids_path = BIDSPath(root=bids_root, task=task, suffix=datatype,
                      extension=extensions[0], datatype=datatype)
 
 rbp_data = process_rbp(bids_path=bids_path, num_subjects=num_subjects,
-                               freq_bands=freq_bands, num_channels=num_channels,
-                               num_bands=num_bands)
+                       freq_bands=freq_bands, num_bands=num_bands)
 
 a_data = rbp_data[alzheimers[0]-1:alzheimers[1]]
 c_data = rbp_data[control[0]-1:control[1]]
