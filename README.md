@@ -6,7 +6,7 @@
 **Data descriptor: 10.3390/data8060095 First study on this dataset: 10.1109/ACCESS.2023.3294618**
 
 ## Preface
-This branch is largely intended to be an emulation of the aforementioned, [original study](https://www.mdpi.com/2306-5729/8/6/95). [`dsprocess.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/svm/src/dsprocess.py) outlines the steps of creating the population of working data for the SVM model. This involves calculating the Relative Band Power (RBP) by splitting the raw data of each patient into 4 second epochs with a 50% overlap and then computing the relative ratio for the PSD of each epoch with reference to the PSD of the entire measured frequency range. 
+This branch is partially intended to be an emulation of the [original study](https://www.mdpi.com/2306-5729/8/6/95), insofar as calculating the Relative Band Power (RBP) and using that as the primary feature for classification. [`dsprocess.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/svm/src/dsprocess.py) outlines the steps of creating the population of working data for the SVM model. This involves calculating the RBP by splitting the raw data of each patient into 4 second epochs with a 50% overlap and then computing the relative ratio for the PSD of each epoch with reference to the PSD of the entire measured frequency range. 
 
 ## Libraries
 * **[openneuro-py](https://github.com/openneuro-py/openneuro-py)**
