@@ -7,33 +7,29 @@ from mne import Epochs, make_fixed_length_epochs as mfl_epochs
 
 from mne_bids import (
     BIDSPath,
-    find_matching_paths,
-    get_entity_vals,
-    make_report,
     print_dir_tree,
     read_raw_bids,
 )
 
 # maybe im an idiot for writing this method
 # God knows best
-def write_rbp_to_csv (fname : str,
-                      sub_len : int,
+def write_rbp_to_csv (sub_len : int,
+                      offset : int,
                       data : list[np.ndarray],
                       root_dir : Path) :
 
-    real_path = root_dir / fname
-    f = open(real_path, "wt")
-    f.write("Delta_Power,Theta_Power,Alpha_Power,Beta_Power,Gamma_Power\n")
-
     for i in range(sub_len) :
-        inner_len = data[i].shape[0]
-        for j in range(inner_len) :
+        fname = "sub_" + str(i+offset).zfill(3) + "_rbp.csv"
+        real_path = root_dir / fname
+        f = open(real_path, "wt")
+        f.write("Delta_Power,Theta_Power,Alpha_Power,Beta_Power,Gamma_Power\n")
+        num_epochs = data[i].shape[0]
+        for j in range(num_epochs) :
             f.write(str(data[i][j][0]) + ',' + str(data[i][j][1]) + ',' +
                     str(data[i][j][2]) + ',' + str(data[i][j][3]) + ',' + 
                     str(data[i][j][4]) + '\n')
-
-    print(f"\"{fname}\" successfully made!")
-    f.close()
+        print(f"\"{fname}\" successfully made!")
+        f.close()
     return
 
 
@@ -91,10 +87,6 @@ bids_root = dspath / dataset / "derivatives"
 if not bids_root.exists() :
     openneuro.download(dataset=dataset, target_dir=bids_root)
 
-# make output folder
-out_folder = cwd.parent / "processed"
-makedirs(name=out_folder, mode=0o777, exist_ok=True)
-
 # eeg data setup
 datatype = "eeg"
 extensions = [".set", ".tsv"]
@@ -131,15 +123,21 @@ bids_path = BIDSPath(root=bids_root, task=task, suffix=datatype,
 rbp_data = process_rbp(bids_path=bids_path, num_subjects=num_subjects,
                        freq_bands=freq_bands, num_bands=num_bands)
 
+# partition data
 a_data = rbp_data[alzheimers[0]-1:alzheimers[1]]
 c_data = rbp_data[control[0]-1:control[1]]
 f_data = rbp_data[ftd[0]-1:ftd[1]]
 
-a_fname = "alz_epoch_rbp.csv"
-c_fname = "con_epoch_rbp.csv"
-f_fname = "ftd_epoch_rbp.csv"
+# set out folders
+out_folder = cwd.parent / "processed"
+a_folder = out_folder / "alz"
+c_folder = out_folder / "con"
+f_folder = out_folder / "ftd"
+makedirs(name=out_folder, mode=0o777, exist_ok=True)
+makedirs(name=a_folder, mode=0o777, exist_ok=True)
+makedirs(name=c_folder, mode=0o777, exist_ok=True)
+makedirs(name=f_folder, mode=0o777, exist_ok=True)
 
-write_rbp_to_csv(fname=a_fname, root_dir=out_folder, data=a_data, sub_len=num_a)
-write_rbp_to_csv(fname=c_fname, root_dir=out_folder, data=c_data, sub_len=num_c)
-write_rbp_to_csv(fname=f_fname, root_dir=out_folder, data=f_data, sub_len=num_f)
-
+write_rbp_to_csv(root_dir=a_folder, data=a_data, sub_len=num_a, offset=alzheimers[0])
+write_rbp_to_csv(root_dir=c_folder, data=c_data, sub_len=num_c, offset=control[0])
+write_rbp_to_csv(root_dir=f_folder, data=f_data, sub_len=num_f, offset=ftd[0])
