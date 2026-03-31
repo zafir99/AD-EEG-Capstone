@@ -16,7 +16,7 @@ This branch is partially intended to be an emulation of the [original study](htt
 * **[scikit-learn](https://scikit-learn.org/stable/user_guide.html)**
 
 ## Dataset Downloading
-**In [`svg.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/svm/src/svm.py), the dataset will automatically be downloaded in the project root directory, and operations on the dataset assume this directory structure. If you would like to manually install the dataset, instructions below are provided.**
+**In [`dsprocess.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/svm/src/dsprocess.py), the dataset will automatically be downloaded in the project root directory, and operations on the dataset assume this directory structure. If you would like to manually install the dataset however, instructions below are provided.**
 1. Download with openneuro cli (recommended)
      * `openneuro-py download --dataset=ds004504 --target-dir=<whatever_directory>`
      * If the `--target-dir` option is not provided, the current directory will be used by default. Keep in mind that it is assumed the dataset exists in the project root directory, so downloading it there would be most convenient.
