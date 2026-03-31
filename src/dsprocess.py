@@ -16,31 +16,41 @@ from mne_bids import (
 
 # maybe im an idiot for writing this method
 # God knows best
-def write_csv (fname : str, len : int, data : np.ndarray, root_dir : Path) :
+def write_rbp_to_csv (fname : str, 
+                      sub_len : int, 
+                      data : list[np.ndarray], 
+                      root_dir : Path) :
+
     real_path = root_dir / fname
     f = open(real_path, "wt")
     f.write("Delta_Power,Theta_Power,Alpha_Power,Beta_Power,Gamma_Power\n")
 
-    for i in len :
-        f.write(str(data[i][0]) + ',' + str(data[i][1]) + ',' +
-                str(data[i][2]) + ',' + str(data[i][3]) + str(data[i][4]) + '\n')
+    for i in range(sub_len) :
+        inner_len = data[i].shape[0]
+        for j in range(inner_len) :
+            f.write(str(data[i][j][0]) + ',' + str(data[i][j][1]) + ',' +
+                    str(data[i][j][2]) + ',' + str(data[i][j][3]) + ',' + 
+                    str(data[i][j][4]) + '\n')
 
     print(f"\"{fname}\" successfully made!")
     f.close()
     return
 
 
-def process_rbp (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tuple[int]],
-                 num_channels : int, num_bands : int) -> list(np.ndarray) :
+def process_rbp (bids_path : BIDSPath, 
+                 num_subjects : int, 
+                 freq_bands : Tuple[Tuple[int]],
+                 num_channels : int, 
+                 num_bands : int) -> list[np.ndarray] :
 
-    subject_data = [ [] * num_subjects ]
+    subject_data = []
     epoch_dur = 4.0
     overlap_ratio = 0.5
     overlap = overlap_ratio*epoch_dur
     fmin = freq_bands[0][0]
     fmax = freq_bands[num_bands-1][1]
 
-    for i in range(1) :
+    for i in range(num_subjects) :
         bids_path.update(subject=str(i+1).zfill(3))
         raw = read_raw_bids(bids_path=bids_path, verbose=False)
         epochs = mfl_epochs(raw=raw, duration=epoch_dur, overlap=overlap)
@@ -50,17 +60,17 @@ def process_rbp (bids_path : BIDSPath, num_subjects : int, freq_bands : Tuple[Tu
         e_len = len(epochs)
 
         specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax)
-        total_psd_per_epoch = specs.get_data().sum(axis=1).sum(axis=1)
-        arr = np.zeros(shape=(e_len,num_channels), dtype=np.float64)
+        total_psd = specs.get_data().sum(axis=1).sum(axis=1)
+        arr = np.zeros(shape=(e_len,num_bands), dtype=np.float64)
 
         for j in range(num_bands) :
             freq_data = specs.get_data(fmin=freq_bands[j][0], fmax=freq_bands[j][1]).sum(axis=1).sum(axis=1)
             for k in range (e_len) :
-                rbp = freq_data[k] / total_psd_per_epoch[k]
-                print(rbp)
+                rbp = freq_data[k] / total_psd[k]
+                # try to be cache friendly challenge
                 arr[k][j] = rbp
 
-        # save data to overall list
+        # append data to overall list
         subject_data.append(arr)
         # cleanup
         raw.close()
@@ -131,7 +141,7 @@ a_fname = "alz_epoch_rbp.csv"
 c_fname = "con_epoch_rbp.csv"
 f_fname = "ftd_epoch_rbp.csv"
 
-#write_csv(filename=a_fname, root_dir=out_folder, data=a_channel_avg, len=num_a)
-#write_csv(filename=c_fname, root_dir=out_folder, data=c_channel_avg, len=num_c)
-#write_csv(filename=f_fname, root_dir=out_folder, data=f_channel_avg, len=num_f)
+write_rbp_to_csv(fname=a_fname, root_dir=out_folder, data=a_data, sub_len=num_a)
+write_rbp_to_csv(fname=c_fname, root_dir=out_folder, data=c_data, sub_len=num_c)
+write_rbp_to_csv(fname=f_fname, root_dir=out_folder, data=f_data, sub_len=num_f)
 
