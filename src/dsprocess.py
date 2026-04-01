@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import openneuro
 import numpy as np
 from os import getcwd, makedirs
