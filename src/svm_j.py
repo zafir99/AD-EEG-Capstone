@@ -147,7 +147,7 @@ if __name__ == "__main__":
     else:
         model = train_svm(X, y)
         
-        #ts not working fuck my chud life
+        #ts not working screw my chud life
 #        fig, ax = plt.subplots(figsize=(8, 6))
 #        DecisionBoundryDisplay.from_estimator(
 #            model,
