@@ -58,11 +58,11 @@ def process_rbp (bids_path : BIDSPath,
         e_len = len(epochs)
 
         specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax)
-        total_psd = specs.get_data().sum(axis=1).sum(axis=1)
+        total_psd = np.absolute(specs.get_data()).sum(axis=1).sum(axis=1)
         arr = np.zeros(shape=(e_len,num_bands), dtype=np.float64)
 
         for j in range(num_bands) :
-            freq_data = specs.get_data(fmin=freq_bands[j][0], fmax=freq_bands[j][1]).sum(axis=1).sum(axis=1)
+            freq_data = np.absolute(specs.get_data(fmin=freq_bands[j][0], fmax=freq_bands[j][1])).sum(axis=1).sum(axis=1)
             for k in range (e_len) :
                 rbp = freq_data[k] / total_psd[k]
                 arr[k][j] = rbp
