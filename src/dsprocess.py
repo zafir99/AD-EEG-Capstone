@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import openneuro
 import numpy as np
 from os import getcwd, makedirs
@@ -53,23 +52,28 @@ def process_rbp (bids_path : BIDSPath,
         bids_path.update(subject=str(i+1).zfill(3))
         raw = read_raw_bids(bids_path=bids_path, verbose=False)
         epochs = mfl_epochs(raw=raw, duration=epoch_dur, overlap=overlap)
+
         # dont need to drop any epochs
         # load data from disk
         epochs.load_data()
         e_len = len(epochs)
 
+        # get psd for each epoch
         specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax, remove_dc=False)
-        total_psd = simpson(y=np.absolute(specs.get_data()), axis=-1).sum(axis=1)
+        # sampling frequency resolution
+        res = specs.freqs[1]-specs.freqs[0]
+        # simpson calculates area under the curve
+        total_psd = simpson(y=np.absolute(specs.get_data()), axis=-1,dx=res).sum(axis=1)
         arr = np.zeros(shape=(e_len,num_bands), dtype=np.float64)
 
         for j in range(num_bands) :
-            freq_data = simpson(y=np.absolute(
+            band_data = simpson(y=np.absolute(
                                 specs.get_data(fmin=freq_bands[j][0],
                                                fmax=freq_bands[j][1])
                                 ),
-                                axis=-1).sum(axis=1)
+                        axis=-1,dx=res).sum(axis=1)
             for k in range (e_len) :
-                rbp = freq_data[k] / total_psd[k]
+                rbp = band_data[k] / total_psd[k]
                 arr[k][j] = rbp
 
         # append data to overall list
@@ -113,8 +117,8 @@ num_subjects = 88
 delta = (0.5,4)
 theta = (4,8)
 alpha = (8,13)
-beta  = (13,30)
-gamma = (30,45)
+beta  = (13,25)
+gamma = (25,45)
 freq_bands = (delta, theta, alpha, beta, gamma)
 num_bands = len(freq_bands)
 

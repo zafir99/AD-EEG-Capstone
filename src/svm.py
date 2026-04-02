@@ -28,14 +28,17 @@ num_subjects = 88
 delta = (0.5,4)
 theta = (4,8)
 alpha = (8,13)
-beta  = (13,30)
-gamma = (30,45)
+beta  = (13,25)
+gamma = (25,45)
 freq_bands = (delta, theta, alpha, beta, gamma)
 num_bands = len(freq_bands)
 
 alz_list = []
 
-for i in range (num_a-1) :
+skip = 0
+for i in range (num_a) :
+    if (i == skip) :
+        continue
     csv = pd.read_csv(alz_root / ("sub_" + str(i+alz_index[0]).zfill(3) + "_rbp.csv"), sep=',')
     alz_list.append(csv)
 
@@ -43,12 +46,14 @@ alz_data = pd.concat(alz_list).to_numpy(dtype=np.float64)
 del alz_list
 
 con_list = []
-for i in range (num_c-1) :
+for i in range (num_c) :
+    if (i == skip) :
+        continue
     csv = pd.read_csv(con_root / ("sub_" + str(i+con_index[0]).zfill(3) + "_rbp.csv"), sep=',')
     con_list.append(csv)
 
-reserved_con = pd.read_csv(con_root / ("sub_" + str(con_index[0]).zfill(3) + "_rbp.csv"), sep=',').to_numpy(dtype=np.float64)
-reserved_alz = pd.read_csv(alz_root / ("sub_" + str(alz_index[0]).zfill(3) + "_rbp.csv"), sep=',').to_numpy(dtype=np.float64)
+reserved_con = pd.read_csv(con_root / ("sub_" + str(skip+con_index[0]).zfill(3) + "_rbp.csv"), sep=',').to_numpy(dtype=np.float64)
+reserved_alz = pd.read_csv(alz_root / ("sub_" + str(skip+alz_index[0]).zfill(3) + "_rbp.csv"), sep=',').to_numpy(dtype=np.float64)
 
 con_data = pd.concat(con_list).to_numpy(dtype=np.float64)
 del con_list
@@ -75,7 +80,8 @@ print(f"Control Accuracy Rate: {acc*100}")
 
 acc = 0
 lab_arr = clf.predict(reserved_alz)
-for num in lab_arr :
-    acc += 1
+for num in lab_arr:
+    acc += num
+
 acc /= len(lab_arr)
 print(f"Alzheimers Accuracy Rate: {acc*100}")
