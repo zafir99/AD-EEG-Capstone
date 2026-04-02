@@ -35,6 +35,7 @@ def write_rbp_to_csv (sub_len : int,
     return
 
 
+# compute relative band power for every epoch of every subject
 def process_rbp (bids_path : BIDSPath,
                  num_subjects : int,
                  freq_bands : Tuple[Tuple[int]],
@@ -64,7 +65,6 @@ def process_rbp (bids_path : BIDSPath,
             freq_data = specs.get_data(fmin=freq_bands[j][0], fmax=freq_bands[j][1]).sum(axis=1).sum(axis=1)
             for k in range (e_len) :
                 rbp = freq_data[k] / total_psd[k]
-                # try to be cache friendly challenge
                 arr[k][j] = rbp
 
         # append data to overall list

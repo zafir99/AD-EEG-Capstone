@@ -62,6 +62,6 @@ total_data = np.concat([con_data, alz_data], axis=0)
 labels = ["control"] * count_c_recs + ["alzheimers"] * count_a_recs
 int_labels = [0] * count_c_recs + [1] * count_a_recs
 clf = svm.SVC(kernel='poly')
-clf.fit(total_data,labels)
+clf.fit(total_data,int_labels)
 arr = clf.predict(reserved_alz)
 
