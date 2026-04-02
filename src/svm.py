@@ -79,9 +79,10 @@ for n in range(con_index[1]) :
 
     labels = ["control"] * count_c_recs + ["alzheimers"] * count_a_recs
     bin_labels = [0] * count_c_recs + [1] * count_a_recs
-    expected = 0
-    if (skip <= alz_index[1]) :
-        expected = 1
+
+    expected = 1
+    if (skip >= con_index[0]) :
+        expected = 0
 
     clf = svm.SVC(kernel='poly', degree=5)
     clf.fit(total_data,bin_labels)
