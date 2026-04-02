@@ -6,6 +6,7 @@ from os import getcwd, makedirs
 from pathlib import Path
 from mne.io import Raw
 from mne import Epochs, make_fixed_length_epochs as mfl_epochs
+from scipy.integrate import simpson
 
 from mne_bids import (
     BIDSPath,
@@ -57,12 +58,16 @@ def process_rbp (bids_path : BIDSPath,
         epochs.load_data()
         e_len = len(epochs)
 
-        specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax)
-        total_psd = np.absolute(specs.get_data()).sum(axis=1).sum(axis=1)
+        specs = epochs.compute_psd(method="welch", verbose=False, fmin=fmin, fmax=fmax, remove_dc=False)
+        total_psd = simpson(y=np.absolute(specs.get_data()), axis=-1).sum(axis=1)
         arr = np.zeros(shape=(e_len,num_bands), dtype=np.float64)
 
         for j in range(num_bands) :
-            freq_data = np.absolute(specs.get_data(fmin=freq_bands[j][0], fmax=freq_bands[j][1])).sum(axis=1).sum(axis=1)
+            freq_data = simpson(y=np.absolute(
+                                specs.get_data(fmin=freq_bands[j][0],
+                                               fmax=freq_bands[j][1])
+                                ),
+                                axis=-1).sum(axis=1)
             for k in range (e_len) :
                 rbp = freq_data[k] / total_psd[k]
                 arr[k][j] = rbp
