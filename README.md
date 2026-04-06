@@ -10,10 +10,11 @@ This branch is partially intended to be an emulation of the [original study](htt
 
 ## Libraries
 * **[openneuro-py](https://github.com/openneuro-py/openneuro-py)**
-* **[mne-bids](https://mne.tools/mne-bids/stable/api.html)**
 * **[mne](https://github.com/mne-tools/mne-python)**
-* **[scipy](https://docs.scipy.org/doc/scipy/)**
+* **[mne-bids](https://mne.tools/mne-bids/stable/api.html)**
+* **[pandas](https://pandas.pydata.org/docs/)**
 * **[scikit-learn](https://scikit-learn.org/stable/user_guide.html)**
+* **[scipy](https://docs.scipy.org/doc/scipy/)**
 
 ## Dataset Downloading
 **In [`dsprocess.py`](https://github.com/zafir99/AD-EEG-Capstone/blob/svm/src/dsprocess.py), the dataset will automatically be downloaded in the project root directory, and operations on the dataset assume this directory structure. If you would like to manually install the dataset however, instructions below are provided.**
