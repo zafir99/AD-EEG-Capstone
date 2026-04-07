@@ -84,7 +84,7 @@ for n in range(con_index[1]) :
     if (skip >= con_index[0]) :
         expected = 0
 
-    clf = svm.SVC(kernel='poly', degree=5)
+    clf = svm.SVC(kernel='rbf', C=1.0, gamma='scale', class_weight='balanced')
     clf.fit(total_data,bin_labels)
 
     print(f"Testing subject {skip}'s data...")
