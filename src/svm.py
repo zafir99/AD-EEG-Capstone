@@ -62,7 +62,7 @@ for n in range(con_index[1]) :
         if (idx == skip) :
             continue
         sub_file = "sub_" + str(idx).zfill(3) + "_rbp.csv"
-        csv = pd.read_csv(con_root / ("sub_" + str(idx).zfill(3) + "_rbp.csv"), sep=',')
+        csv = pd.read_csv(con_root / sub_file, sep=',')
         con_list.append(csv)
 
     test = pd.read_csv(skip_root / ("sub_" + str(skip).zfill(3) + "_rbp.csv"), sep=',').to_numpy(dtype=np.float64)
