@@ -40,9 +40,10 @@ except ImportError:
 # =========================
 # Fine-tuning search space
 # =========================
-# Wide search to explore very different model complexity regimes.
-GRID_C_VALUES = [0.01, 0.1, 1, 10, 100]
-GRID_GAMMA_VALUES = [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+# Search for larger C stress-test values.
+GRID_C_VALUES = [0.1, 0.5, 1, 10, 50]
+# Testing gamma for larger C values
+GRID_GAMMA_VALUES = [0.0005, 0.001, 0.01, 0.002]
 FIXED_CLASS_WEIGHT = "balanced"
 
 def load_subject_csv(folder: Path, subject_id: int) -> np.ndarray:
@@ -171,7 +172,7 @@ def main() -> None:
         search = GridSearchCV(
             estimator=pipeline,
             param_grid=param_grid,
-            scoring="balanced_accuracy",
+            scoring="accuracy",
             cv=inner_cv,
             n_jobs=-1,
             refit=True,
@@ -336,5 +337,24 @@ weighted avg       0.54      0.51      0.50      7943
 """
 #TLDR, 100 is the most common C value but it isn't by a significant margin
 #Not every 100, 0.01 pair works
-#Might need to test some more?
+#Might need to test some more with higher C values? As in I have been hovering around 0.1 and as of now obtaining higher accuracy is kinda rough
+
+#Eighth run setup (higher C focus + local gamma)
+#GRID_C_VALUES = [10, 50, 100]
+#GRID_GAMMA_VALUES = [0.0001, 0.001, 0.01]
+#FIXED_CLASS_WEIGHT = "balanced"
+#GridSearch scoring = "accuracy"
+#Top (C, gamma): (100, 0.01) (7/20 folds)
+#Accuracy: 0.5499
+#Balanced Accuracy: 0.5636
+
+#Ninth run (mixed C<1 and C>1 test, scoring = accuracy)
+#GRID_C_VALUES = [0.1, 0.5, 1, 10, 50]
+#GRID_GAMMA_VALUES = [0.0005, 0.001, 0.01, 0.002]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 50.0 (10/20 folds)
+#Top gamma: 0.01 (6/20 folds)
+#Top (C, gamma): (50.0, 0.001) (4/20 folds)
+#Accuracy: 0.4940
+#Balanced Accuracy: 0.5114
 
