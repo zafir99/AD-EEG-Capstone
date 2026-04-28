@@ -28,10 +28,9 @@ cwd = Path(getcwd())
 data_root = cwd.parent / "processed"
 alz_root = data_root / "alz"
 con_root = data_root / "con"
-ftd_root = data_root / "ftd"
 
 # Check if processed dataset exists, if not run dsprocess.py
-if not (alz_root.exists() and con_root.exists() and ftd_root.exists()):
+if not (alz_root.exists() and con_root.exists()):
     print("Processed dataset does not exist.\nNow running dsprocess.py...\n")
     execv("./dsprocess.py", [" "])
 
@@ -43,9 +42,8 @@ ad_ids = list(range(alz_index[0], alz_index[1] + 1))
 con_ids = list(range(con_index[0], con_index[1] + 1))
 eval_ids = ad_ids + con_ids
 
-# Fixed params to validate against finetune.py results
-C_VALUE = 0.11
-GAMMA_VALUE = 0.0012
+# Toggle preprocessing for quick A/B checks against svm.py
+USE_SCALER = False
 
 acc = 0
 total_rec = 0
@@ -92,13 +90,16 @@ for skip in eval_ids:
     # True class for held-out subject rows
     expected = 1 if skip in ad_ids else 0
 
-    # Fit scaler on training rows only, then apply the same shift/scale to test.
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(total_data)
-    X_test = scaler.transform(test)
+    if USE_SCALER:
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(total_data)
+        X_test = scaler.transform(test)
+    else:
+        X_train = total_data
+        X_test = test
 
-    # Fixed SVM hyperparameters (same value applied to every outer fold)
-    clf = SVC(kernel="rbf", C=C_VALUE, gamma=GAMMA_VALUE, class_weight="balanced")
+    #SVM Implementation, tune hyperameters here
+    clf = SVC(kernel="rbf", C=50, gamma="scale", class_weight="balanced")
     clf.fit(X_train, bin_labels)
 
     print(f"Testing subject {skip}'s data...")
@@ -133,3 +134,17 @@ print(f"F1 (AD=1): {f1_ad * 100}%")
 # Run history (full 65-subject LOSO):
 # - C=0.1, gamma=0.001, class_weight="balanced" -> Accuracy Rate: 64.20116112493403%
 # - C=0.11, gamma=0.0012, class_weight="balanced" -> Accuracy Rate:  64.81942245344192%
+# - C=1.0, gamma='scale', class_weight="balanced" -> Accuracy Rate: 68.12184272034985%
+# - C=0.1, gamma='scale', class_weight="balanced" -> Accuracy Rate: 68.31033702782176%
+# - C=1, gamma=0.2, class_weight="balanced" -> Accuracy Rate: 68.12184272034985%
+#All the prior runs were with standard scaler, now we are using without it.
+# Kernel: rbf, C=1, gamma='scale', class_weight="balanced" -> Accuracy Rate: 68.30656714167233%
+# Kernel: poly, degree: 3, C: 1.0, gamma: scale, class_weight: balanced -> Accuracy Rate: 68.69486541506447%
+#Kernel: poly, degree: 3, C: 0.1, gamma: scale, class_weight: balanced -> Accuracy Rate: 68.2839478247757%
+#Kernel: poly, degree: 3, C: 0.1, gamma: scale, class_weight: balanced -> Accuracy Rate: 59.71122672095303% with scaler
+#Kernel: poly, degree: 3, C: 0.05, gamma: 0.02, coef0: 2.0, class_weight: balanced -> Accuracy Rate: 56.303249641860816%
+#Kernel: poly, degree: 2, C: 0.1, gamma: scale, coef0: 2.0, class_weight: balanced -> Accuracy Rate: 67.62044786247455%
+#Kernel: rbf, C: 0.1, gamma: scale, class_weight: balanced -> Accuracy Rate: 66.22182010103295%
+#Kernel: poly, degree: 3, C: 1, gamma: scale, coef0: 2.0, class_weight: balanced, Accuracy Rate: 68.7174847319611%
+#Kernel: rbf, C: 50, gamma: scale, class_weight: balanced -> Accuracy Rate: 62.968408354067705%
+#Kernel: rbf, C: 50, gamma: 0.001, class_weight: balanced -> Accuracy Rate: 68.67601598431727%,

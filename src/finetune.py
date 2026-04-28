@@ -40,11 +40,25 @@ except ImportError:
 # =========================
 # Fine-tuning search space
 # =========================
-# Search for larger C stress-test values.
-GRID_C_VALUES = [0.1, 0.5, 1, 10, 50]
-# Testing gamma for larger C values
-GRID_GAMMA_VALUES = [0.0005, 0.001, 0.01, 0.002]
+# Hyperparameter candidates used by GridSearchCV.
+# Keep these as plain Python lists so they are easy to edit between runs.
+# NOTE: gamma may be either numeric (float/int) OR the strings "scale"/"auto".
+#       If you include string gamma options, keep the tracking list types below as str.
+# C values to test
+GRID_C_VALUES = [20, 25, 30, 35, 40, 45, 50]
+# Gamma values to test
+GRID_GAMMA_VALUES = [0.001]
+# Degree values for polynomial kernel
+# GRID_DEGREES = [2, 3]
+# FIXED_DEGREE = 2
+# Bias term values used by polynomial kernel
+# GRID_COEF0_VALUES = [0, 0.5, 1, 2]
+# FIXED_COEF0 = 2.0
 FIXED_CLASS_WEIGHT = "balanced"
+# Fixed kernel config for this experiment
+FIXED_KERNEL = "rbf"
+# If you want to grid-search class weights later, define candidates like:
+# GRID_CLASS_WEIGHTS = ["balanced", None, {0: 1.0, 1: 1.0}]
 
 def load_subject_csv(folder: Path, subject_id: int) -> np.ndarray:
     """Load one subject's processed RBP feature matrix."""
@@ -103,9 +117,12 @@ def main() -> None:
     # Collect final predictions across all outer LOSO folds.
     all_true_rows: list[int] = []
     all_pred_rows: list[int] = []
+    # Best-hyperparameter tracking across outer folds.
+    # C is always numeric, gamma is stored as string so mixed values
+    # (e.g., 0.01 and "scale") can be counted in one structure.
     best_c_values: list[float] = []
-    best_gamma_values: list[float] = []
-    best_param_pairs: list[tuple[float, float]] = []
+    best_gamma_values: list[str] = []
+    best_param_pairs: list[tuple[float, str]] = []
 
     print("=== Fine-tune Setup ===")
     print(f"Subjects used (20 total): AD={ad_ids}, Control={con_ids}")
@@ -151,14 +168,24 @@ def main() -> None:
         pipeline = Pipeline(
             steps=[
                 ("scaler", StandardScaler()),
-                ("svc", SVC(kernel="rbf", class_weight=FIXED_CLASS_WEIGHT)),
+                (
+                    "svc",
+                    SVC(
+                        kernel=FIXED_KERNEL,
+                        class_weight=FIXED_CLASS_WEIGHT,
+                    ),
+                ),
             ]
         )
 
-        # Tune C and gamma with class_weight fixed to balanced.
+        # The parameter grid tells GridSearchCV what to tune 
+        # Add/remove keys here when changing the tuning scenario.
         param_grid = {
             "svc__C": GRID_C_VALUES,
             "svc__gamma": GRID_GAMMA_VALUES,
+            # "svc__degree": GRID_DEGREES,
+            # "svc__coef0": GRID_COEF0_VALUES,
+            # "svc__class_weight": GRID_CLASS_WEIGHTS,
         }
 
         # -------------------------------------------------------------------------
@@ -187,8 +214,10 @@ def main() -> None:
                     category=UserWarning,
                 )
                 search.fit(X_train, y_train, groups=groups_train)
+        # Store best hyperparameters selected for this outer fold.
+        # Keep gamma as str to safely support numeric + keyword gamma values.
         best_c = float(search.best_params_["svc__C"])
-        best_gamma = float(search.best_params_["svc__gamma"])
+        best_gamma = str(search.best_params_["svc__gamma"])
         best_c_values.append(best_c)
         best_gamma_values.append(best_gamma)
         best_param_pairs.append((best_c, best_gamma))
@@ -203,22 +232,36 @@ def main() -> None:
             f"| row_acc={fold_row_acc:.4f}"
         )
 
+    #Count the frequency of the best parameters across all folds
     c_counter = Counter(best_c_values)
     gamma_counter = Counter(best_gamma_values)
     pair_counter = Counter(best_param_pairs)
     top_c, top_c_count = c_counter.most_common(1)[0]
     top_gamma, top_gamma_count = gamma_counter.most_common(1)[0]
     top_pair, top_pair_count = pair_counter.most_common(1)[0]
+    # degree_counter = Counter(best_degree_values)
+    # coef0_counter = Counter(best_coef0_values)
+    # class_weight_counter = Counter(best_class_weight_values)
+    # top_degree, top_degree_count = degree_counter.most_common(1)[0]
+    # top_coef0, top_coef0_count = coef0_counter.most_common(1)[0]
+    # top_class_weight, top_class_weight_count = class_weight_counter.most_common(1)[0]
 
     print("\n=== Best Parameter Frequency (Across 20 LOSO Folds) ===")
     print(f"C counts: {dict(sorted(c_counter.items()))}")
-    print(f"Gamma counts: {dict(sorted(gamma_counter.items()))}")
+    print(f"Gamma counts: {dict(gamma_counter)}")
     print(f"Top C: {top_c} ({top_c_count}/20 folds)")
     print(f"Top gamma: {top_gamma} ({top_gamma_count}/20 folds)")
+    # print(f"Degree counts: {dict(sorted(degree_counter.items()))}")
+    # print(f"coef0 counts: {dict(sorted(coef0_counter.items()))}")
+    # print(f"Class-weight counts: {dict(class_weight_counter)}")
+    # print(f"Top degree: {top_degree} ({top_degree_count}/20 folds)")
+    # print(f"Top coef0: {top_coef0} ({top_coef0_count}/20 folds)")
+    # print(f"Top class_weight: {top_class_weight} ({top_class_weight_count}/20 folds)")
     print(
         f"Top (C, gamma): ({top_pair[0]}, {top_pair[1]}) "
         f"({top_pair_count}/20 folds)"
     )
+
 
     # -----------------------------------
     # 6) Aggregate and print final metrics
@@ -357,4 +400,125 @@ weighted avg       0.54      0.51      0.50      7943
 #Top (C, gamma): (50.0, 0.001) (4/20 folds)
 #Accuracy: 0.4940
 #Balanced Accuracy: 0.5114
+
+#Tenth run??? (Dude I lost track) 
+#Based on running svm.py, it seems that the original parameters of C = 1 and
+# gamma='scale' seem to get the highest accuracy? I also have heard that automatically
+# the gamma would be 0.2 due to there being 5 features. Now going to do a generic test 
+# of C values around 1, and using scale, 0.2, and some other gamma values to work with.
+#C counts: {0.1: 7, 0.5: 5, 1.0: 3, 5.0: 3, 10.0: 2}
+#Gamma counts: {'0.1': 4, '0.01': 15, 'scale': 1}
+#Top C: 0.1 (7/20 folds)
+#Top gamma: 0.01 (15/20 folds)
+#Top (C, gamma): (0.5, 0.01) (5/20 folds)
+
+#"Eleventh" run (poly kernel fixed degree=3, fixed class weight)
+#GRID_C_VALUES = [0.01, 0.1, 1, 10]
+#GRID_GAMMA_VALUES = ["scale", 0.001, 0.01, 0.05, 0.2]
+#FIXED_KERNEL = "poly"
+#FIXED_DEGREE = 3
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 0.01 (8/20 folds)
+#Top gamma: 0.001 (10/20 folds)
+#Top (C, gamma): (0.01, 0.01) (6/20 folds)
+#Accuracy: 0.2845
+#Balanced Accuracy: 0.2746
+
+#Twelfth run (poly kernel grid: C, gamma, degree, coef0)
+#GRID_C_VALUES = [0.1, 1, 10]
+#GRID_GAMMA_VALUES = ["scale", 0.05, 0.1, 0.2]
+#GRID_DEGREES = [2, 3]
+#GRID_COEF0_VALUES = [0, 0.5, 1, 2]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 0.1 (15/20 folds)
+#Top gamma: 0.05 (13/20 folds)
+#Top degree: 3 (11/20 folds)
+#Top coef0: 2.0 (7/20 folds)
+#Top (C, gamma, degree, coef0): (0.1, 0.05, 2, 2.0) (4/20 folds)
+#Accuracy: 0.5061
+#Balanced Accuracy: 0.5195
+
+#Thirteenth run (poly kernel, fixed degree/coef0 with C/gamma sweep)
+#FIXED_KERNEL = "poly"
+#FIXED_DEGREE = 3
+#FIXED_COEF0 = 2.0
+#GRID_C_VALUES = [0.05, 0.1, 0.2, 0.5, 1]
+#GRID_GAMMA_VALUES = ["scale", 0.02, 0.05, 0.1]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 0.05 (13/20 folds)
+#Top gamma: 0.02 (13/20 folds)
+#Top (C, gamma): (0.05, 0.02) (9/20 folds)
+#Accuracy: 0.5745
+#Balanced Accuracy: 0.5827
+
+#Fourteenth run (poly kernel, fixed degree=2/coef0 with C/gamma sweep)
+#FIXED_KERNEL = "poly"
+#FIXED_DEGREE = 2
+#FIXED_COEF0 = 2.0
+#GRID_C_VALUES = [0.05, 0.1, 0.2, 0.5, 1]
+#GRID_GAMMA_VALUES = ["scale", 0.02, 0.05, 0.1]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 0.2 (5/20 folds)
+#Top gamma: 0.02 (13/20 folds)
+#Top (C, gamma): (0.2, 0.02) (5/20 folds)
+#Accuracy: 0.5782
+#Balanced Accuracy: 0.5897
+
+#Fifteenth run (poly kernel, degree=2/coef0 fixed, expanded low-gamma test)
+#FIXED_KERNEL = "poly"
+#FIXED_DEGREE = 2
+#FIXED_COEF0 = 2.0
+#GRID_C_VALUES = [0.1, 0.15, 0.2, 0.3, 0.5]
+#GRID_GAMMA_VALUES = ["scale", 0.01, 0.02, 0.05, 0.001, 0.005]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 0.5 (6/20 folds)
+#Top gamma: 0.02 (8/20 folds)
+#Top (C, gamma): (0.5, 0.01) (3/20 folds)
+#Accuracy: 0.5489
+#Balanced Accuracy: 0.5626
+
+#Sixteenth run (rbf kernel, high-C sweep near 50)
+#FIXED_KERNEL = "rbf"
+#GRID_C_VALUES = [50, 75, 100]
+#GRID_GAMMA_VALUES = ["scale", 0.01, 0.02, 0.05, 0.001, 0.005]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 50.0 (11/20 folds)
+#Top gamma: 0.001 (14/20 folds)
+#Top (C, gamma): (50.0, 0.001) (11/20 folds)
+#Accuracy: 0.5928
+#Balanced Accuracy: 0.6014
+
+#Seventeenth run (rbf kernel, local search around C~50 and gamma~0.001)
+#FIXED_KERNEL = "rbf"
+#GRID_C_VALUES = [35, 50, 65, 80]
+#GRID_GAMMA_VALUES = [0.0005, 0.001, 0.002, 0.005]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 35.0 (7/20 folds)
+#Top gamma: 0.0005 (9/20 folds)
+#Top (C, gamma): (35.0, 0.0005) (4/20 folds)
+#Accuracy: 0.5871
+#Balanced Accuracy: 0.5967
+
+#Eighteenth run (rbf kernel, fixed C=40 with small gamma sweep)
+#FIXED_KERNEL = "rbf"
+#GRID_C_VALUES = [40]
+#GRID_GAMMA_VALUES = ["scale", 0.001, 0.0005]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 40.0 (20/20 folds)
+#Top gamma: 0.001 (13/20 folds)
+#Top (C, gamma): (40.0, 0.001) (13/20 folds)
+#Accuracy: 0.5883
+#Balanced Accuracy: 0.5989
+
+#Nineteenth run (rbf kernel, gamma fixed at 0.001 with C sweep 20-50)
+#FIXED_KERNEL = "rbf"
+#GRID_C_VALUES = [20, 25, 30, 35, 40, 45, 50]
+#GRID_GAMMA_VALUES = [0.001]
+#FIXED_CLASS_WEIGHT = "balanced"
+#Top C: 50.0 (6/20 folds)
+#Top gamma: 0.001 (20/20 folds)
+#Top (C, gamma): (50.0, 0.001) (6/20 folds)
+#Accuracy: 0.5894
+#Balanced Accuracy: 0.5996
+
 
