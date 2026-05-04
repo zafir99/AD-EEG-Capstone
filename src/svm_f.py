@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     balanced_accuracy_score,
+    classification_report,
     f1_score,
     precision_score,
     recall_score,
@@ -99,7 +100,7 @@ for skip in eval_ids:
         X_test = test
 
     #SVM Implementation, tune hyperameters here
-    clf = SVC(kernel="rbf", C=50, gamma="scale", class_weight="balanced")
+    clf = SVC(kernel="poly", degree=3, coef0=2.0, C=1, gamma="scale", class_weight="balanced")
     clf.fit(X_train, bin_labels)
 
     print(f"Testing subject {skip}'s data...")
@@ -131,6 +132,10 @@ print(f"Recall (AD=1): {recall_ad * 100}%")
 f1_ad = f1_score(y_true_all, y_pred_all, pos_label=1, zero_division=0)
 print(f"F1 (AD=1): {f1_ad * 100}%")
 
+# Classification report: per-class precision/recall/F1 and support.
+print("\nClassification Report (Row-Level):")
+print(classification_report(y_true_all, y_pred_all, target_names=["control", "alzheimers"]))
+
 # Run history (full 65-subject LOSO):
 # - C=0.1, gamma=0.001, class_weight="balanced" -> Accuracy Rate: 64.20116112493403%
 # - C=0.11, gamma=0.0012, class_weight="balanced" -> Accuracy Rate:  64.81942245344192%
@@ -148,3 +153,5 @@ print(f"F1 (AD=1): {f1_ad * 100}%")
 #Kernel: poly, degree: 3, C: 1, gamma: scale, coef0: 2.0, class_weight: balanced, Accuracy Rate: 68.7174847319611%
 #Kernel: rbf, C: 50, gamma: scale, class_weight: balanced -> Accuracy Rate: 62.968408354067705%
 #Kernel: rbf, C: 50, gamma: 0.001, class_weight: balanced -> Accuracy Rate: 68.67601598431727%,
+#Kernel: poly, degree: 4, C: 1, gamma: scale, coef0: 2.0, class_weight: balanced -> Accuracy Rate: 68.69109552891503%
+#Kernel: poly, degree: 2, C: 1, gamma: scale, coef0: 2.0, class_weight: balanced -> Accuracy Rate: 68.46490235994874%
