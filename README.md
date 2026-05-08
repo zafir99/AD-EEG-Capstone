@@ -27,7 +27,7 @@ This branch is partially intended to be an emulation of the [original study](htt
      * `datalad install https://github.com/OpenNeuroDatasets/ds004504.git`
 
 ## Source Files (`src/`)
-Most scripts in this repository assume they are executed from inside the `src` directory because of relative pathing to `dsprocess.py` and the `processed` data folders.
+The SVM Model can be found in this directory. Most scripts in this repository assume they are executed from inside the `src` directory because of relative pathing to `dsprocess.py` and the `processed` data folders.
 
 Recommended pattern:
 * `cd src`
