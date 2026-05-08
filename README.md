@@ -26,3 +26,17 @@ This branch is partially intended to be an emulation of the [original study](htt
 3. Download with datalad
      * `datalad install https://github.com/OpenNeuroDatasets/ds004504.git`
 
+## Source Files (`src/`)
+Most scripts in this repository assume they are executed from inside the `src` directory because of relative pathing to `dsprocess.py` and the `processed` data folders.
+
+Recommended pattern:
+* `cd src`
+* `python3 <script_name>.py`
+
+### File Purposes
+* **`dsprocess.py`**: Downloads/reads the OpenNeuro dataset, computes relative band power (RBP) features from EEG epochs, and writes per-subject CSV feature files into `processed/alz`, `processed/con`, and `processed/ftd`.
+* **`svm.py`**: Original LOSO-style SVM implementation on the processed RBP CSV features (AD vs control); this version was developed by **Zaki Ahmed** and served as the baseline for later variants.
+* **`svm_j.py`**: Alternative SVM implementation developed by **Juan Pablo**, exploring a different pipeline based on loading EEG files directly and extracting features before training/testing.
+* **`svm_f.py`**: Current primary implementation developed by **Faaiz Shaphy**, originally based on Zaki's approach because that path produced stronger results; this is the most recently updated version and currently has the best observed accuracy in this branch.
+* **`finetune.py`**: Hyperparameter search utility using nested validation (LOSO outer loop with grouped inner CV via `GridSearchCV`) to evaluate candidate SVM settings and report aggregate metrics.
+
