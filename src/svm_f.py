@@ -100,7 +100,7 @@ for skip in eval_ids:
         X_test = test
 
     #SVM Implementation, tune hyperameters here
-    clf = SVC(kernel="poly", degree=3, coef0=2.0, C=1, gamma="scale", class_weight="balanced")
+    clf = SVC(kernel="poly", degree=4, coef0=10, C=25, gamma="scale", class_weight="balanced")
     clf.fit(X_train, bin_labels)
 
     print(f"Testing subject {skip}'s data...")
